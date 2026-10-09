@@ -1,3 +1,4 @@
+import { retryPromise } from "./retryPromise";
 import {
     fetchProductCatalog,
     fetchProductReviews,
@@ -6,13 +7,13 @@ import {
 
 console.log("Loading e-commerce dashboard...");
 
-fetchProductCatalog()
+retryPromise(() => fetchProductCatalog())
     .then((products) => {
         console.log("Product Catalog:", products);
 
         return Promise.all(
             products.map((product) => {
-                return fetchProductReviews(product.id)
+                return retryPromise(() => fetchProductReviews(product.id))
                     .then((reviews) => {
                         console.log(`Reviews for ${product.name}:`, reviews);
                     })
@@ -23,7 +24,7 @@ fetchProductCatalog()
         );
     })
     .then(() => {
-        return fetchSalesReport()
+        return retryPromise(() => fetchSalesReport())
             .then((report) => {
                 console.log("Sales Report:", report);
             })

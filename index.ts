@@ -1,17 +1,26 @@
 import {
-  fetchProductCatalog,
-  fetchProductReviews,
-  fetchSalesReport,
+    fetchProductCatalog,
+    fetchProductReviews,
+    fetchSalesReport,
 } from "./apiSimulator";
 
+console.log("Loading e-commerce dashboard...");
+
 fetchProductCatalog()
-  .then((products) => console.log("Products:", products))
-  .catch((error) => console.error("Product Error:", error));
+    .then((products) => {
+        console.log("Product Catalog:", products);
 
-fetchProductReviews(1)
-  .then((reviews) => console.log("Reviews:", reviews))
-  .catch((error) => console.error("Review Error:", error));
-
-fetchSalesReport()
-  .then((report) => console.log("Sales Report:", report))
-  .catch((error) => console.error("Sales Error:", error));
+        return Promise.all(
+            products.map((product) => {
+                return fetchProductReviews(product.id).then((reviews) => {
+                    console.log(`Reviews for ${product.name}:`, reviews);
+                });
+            })
+        );
+    })
+    .then(() => {
+        return fetchSalesReport();
+    })
+    .then((report) => {
+        console.log("Sales Report:", report);
+    });
